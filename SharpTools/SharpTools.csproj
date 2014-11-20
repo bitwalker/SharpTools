@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\RingBuffer.cs" />
     <Compile Include="Extend\Time\TimeSpanConversions.cs" />
     <Compile Include="IO\Utility\FileWatcher\FileWatcher.cs" />
     <Compile Include="IO\Utility\FileWatcher\IFileWatcher.cs" />
