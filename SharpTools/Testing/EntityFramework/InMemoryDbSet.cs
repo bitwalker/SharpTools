@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Data.Entity;
@@ -12,6 +14,7 @@ using System.Threading.Tasks;
 using System.Data.Entity.Core.Mapping;
 using System.Globalization;
 using System.Data.Entity.Core.Objects;
+using SharpTools.Testing.EntityFramework.Internal;
 
 namespace SharpTools.Testing.EntityFramework
 {
@@ -21,22 +24,23 @@ namespace SharpTools.Testing.EntityFramework
         private readonly Type _parentContextType;
         private readonly ObservableCollection<TEntity> _data;
         private readonly IQueryable _query;
-        private readonly PropertyInfo[] _primaryKeys;
+        private readonly PrimaryKeyInfo[] _primaryKeys;
+        private readonly PropertyInfo[] _primaryKeyProps;
 
         public InMemoryDbSet()
         {
             _parentContextType = FindContextTypeForEntity(typeof (TEntity));
             _data  = new ObservableCollection<TEntity>();
+            // Handle inserts like SQL Server (by setting the id)
             _query = _data.AsQueryable();
 
             // Cache reflected metadata for this entity, to speed
             // up lookups for functions such as Find
-            var keyNames = GetKeyPropertyNames();
-            var primaryKeys = typeof (TEntity)
+            _primaryKeys     = GetPrimaryKeys();
+            _primaryKeyProps = typeof (TEntity)
                 .GetProperties()
-                .Where(p => keyNames.Contains(p.Name))
+                .Where(p => _primaryKeys.Any(pk => pk.Name == p.Name))
                 .ToArray();
-            _primaryKeys = primaryKeys;
         }
 
         public override object Find(params object[] keyValues)
@@ -54,7 +58,7 @@ namespace SharpTools.Testing.EntityFramework
             var querySource = this.AsQueryable();
             for (var i = 0; i < keyValues.Length && i < _primaryKeys.Length; i++)
             {
-                var pk       = _primaryKeys[i];
+                var pk       = _primaryKeyProps[i];
                 var keyValue = keyValues[i];
                 querySource  = querySource.Where(e => pk.GetValue(e).Equals(keyValue));
             }
@@ -66,7 +70,7 @@ namespace SharpTools.Testing.EntityFramework
             var querySource = this.AsQueryable();
             for (var i = 0; i < keyValues.Length && i < _primaryKeys.Length; i++)
             {
-                var pk       = _primaryKeys[i];
+                var pk       = _primaryKeyProps[i];
                 var keyValue = keyValues[i];
                 querySource  = querySource.Where(e => pk.GetValue(e).Equals(keyValue));
             }
@@ -80,6 +84,15 @@ namespace SharpTools.Testing.EntityFramework
 
         TEntity IDbSet<TEntity>.Add(TEntity item)
         {
+            // Generate and set all of the primary key values for this item
+            foreach (var primaryKey in _primaryKeys)
+            {
+                var keyGenerator = IdentifierGeneratorFactory.Create(primaryKey);
+                var keyProperty  = _primaryKeyProps.First(p => p.Name == primaryKey.Name);
+                var key          = keyGenerator.Generate();
+                keyProperty.SetValue(item, key);
+            }
+
             _data.Add(item);
             return item;
         }
@@ -141,8 +154,9 @@ namespace SharpTools.Testing.EntityFramework
             return new InMemoryDbAsyncEnumerator<TEntity>(_data.GetEnumerator());
         }
 
-        private string[] GetKeyPropertyNames()
+        private PrimaryKeyInfo[] GetPrimaryKeys()
         {
+            var entityType = typeof (TEntity);
             var dbSetType = typeof (IDbSet<>);
             Func<PropertyInfo, bool> isDbSet = p => dbSetType.IsAssignableFrom(p.PropertyType.GetGenericTypeDefinition());
 
@@ -152,8 +166,8 @@ namespace SharpTools.Testing.EntityFramework
             var dbModel = modelBuilder.Build(new DbProviderInfo("System.Data.SqlClient", "2012"));
             return dbModel.StoreModel
                 .EntityTypes
+                .Where(et => et.Name == entityType.Name)
                 .SelectMany(PrimaryKeyInfo.Map)
-                .Select(pk => pk.Name)
                 .ToArray();
         }
 

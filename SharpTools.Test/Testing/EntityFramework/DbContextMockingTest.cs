@@ -48,11 +48,17 @@ namespace SharpTools.Test.Testing.EntityFramework
         [TestMethod]
         public void CanMockDbContextEffectively()
         {
-            var adminUsers = _context.Users.Where(u => u.UserRole.Name == "Admins").ToArray();
-            Assert.IsNotNull(adminUsers);
-            Assert.IsTrue(adminUsers.Any());
-            Assert.AreEqual(adminUsers.Count(), 1);
-            Assert.AreEqual("Paul", adminUsers.First().FirstName);
+            var admins = _context.Roles.First(r => r.Name == "Admins");
+            var byName = _context.Users.Where(u => u.UserRole.Name == admins.Name).ToArray();
+            var byId = _context.Users.Where(u => u.UserRole.Id == admins.Id).ToArray();
+            Assert.IsNotNull(byName);
+            Assert.IsNotNull(byId);
+            Assert.IsTrue(byName.Any());
+            Assert.IsTrue(byId.Any());
+            Assert.AreEqual(byName.Count(), 1);
+            Assert.AreEqual(byId.Count(), 1);
+            Assert.AreEqual("Paul", byName.First().FirstName);
+            Assert.AreEqual("Paul", byId.First().FirstName);
         }
     }
 }
