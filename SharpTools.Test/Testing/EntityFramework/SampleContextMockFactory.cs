@@ -13,8 +13,8 @@ namespace SharpTools.Test.Testing.EntityFramework
             contextMock.SetupAllProperties();
             contextMock.DefaultValue = DefaultValue.Empty;
 
-            contextMock.Setup(ctx => ctx.Users).Returns(new InMemoryDbSet<User, int>());
-            contextMock.Setup(ctx => ctx.Roles).Returns(new InMemoryDbSet<Role, int>());
+            contextMock.Setup(ctx => ctx.Users).Returns(new InMemoryDbSet<User>());
+            contextMock.Setup(ctx => ctx.Roles).Returns(new InMemoryDbSet<Role>());
 
             return contextMock.Object;
         }

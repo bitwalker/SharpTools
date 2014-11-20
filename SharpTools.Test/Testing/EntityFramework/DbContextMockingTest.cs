@@ -48,7 +48,7 @@ namespace SharpTools.Test.Testing.EntityFramework
         [TestMethod]
         public void CanMockDbContextEffectively()
         {
-            var adminUsers = _context.Users.Where(u => u.UserRole.Id == 1).ToArray();
+            var adminUsers = _context.Users.Where(u => u.UserRole.Name == "Admins").ToArray();
             Assert.IsNotNull(adminUsers);
             Assert.IsTrue(adminUsers.Any());
             Assert.AreEqual(adminUsers.Count(), 1);

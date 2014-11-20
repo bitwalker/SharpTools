@@ -9,19 +9,23 @@ using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Data.Entity.Core.Mapping;
+using System.Globalization;
+using System.Data.Entity.Core.Objects;
 
 namespace SharpTools.Testing.EntityFramework
 {
-    public sealed class InMemoryDbSet<TEntity, TKey> : DbSet, IDbSet<TEntity>, IDbAsyncEnumerable<TEntity>
+    public sealed class InMemoryDbSet<TEntity> : DbSet, IDbSet<TEntity>, IDbAsyncEnumerable<TEntity>
         where TEntity : class
     {
+        private readonly Type _parentContextType;
         private readonly ObservableCollection<TEntity> _data;
         private readonly IQueryable _query;
         private readonly PropertyInfo[] _primaryKeys;
-        private string _entityIdProperty = string.Format("{0}ID", typeof (TEntity).Name);
 
         public InMemoryDbSet()
         {
+            _parentContextType = FindContextTypeForEntity(typeof (TEntity));
             _data  = new ObservableCollection<TEntity>();
             _query = _data.AsQueryable();
 
@@ -33,11 +37,6 @@ namespace SharpTools.Testing.EntityFramework
                 .Where(p => keyNames.Contains(p.Name))
                 .ToArray();
             _primaryKeys = primaryKeys;
-        }
-
-        public InMemoryDbSet(string primaryKeyPropertyName) : this()
-        {
-            _entityIdProperty = primaryKeyPropertyName;
         }
 
         public override object Find(params object[] keyValues)
@@ -81,12 +80,6 @@ namespace SharpTools.Testing.EntityFramework
 
         TEntity IDbSet<TEntity>.Add(TEntity item)
         {
-            // Generate IDs for entities which have primary keys
-            if (_primaryKeys.Length > 0 && GetItemId(item) == default(TKey))
-            {
-                TKey id = GetNextId<TKey>();
-                item = SetItemId(item, id);
-            }
             _data.Add(item);
             return item;
         }
@@ -150,101 +143,35 @@ namespace SharpTools.Testing.EntityFramework
 
         private string[] GetKeyPropertyNames()
         {
-            var assembly = Assembly.GetCallingAssembly();
-            var workspace = new MetadataWorkspace(new[] {"res://*/"}, new [] {assembly});
-            return GetKeyPropertyNames(typeof(TEntity), workspace);
+            var dbSetType = typeof (IDbSet<>);
+            Func<PropertyInfo, bool> isDbSet = p => dbSetType.IsAssignableFrom(p.PropertyType.GetGenericTypeDefinition());
+
+            var workspace = new MetadataWorkspace(new[] { "res://*/" }, new[] { _parentContextType.Assembly });
+            var modelBuilder = new DbModelBuilder();
+            modelBuilder.Entity<TEntity>();
+            var dbModel = modelBuilder.Build(new DbProviderInfo("System.Data.SqlClient", "2012"));
+            return dbModel.StoreModel
+                .EntityTypes
+                .SelectMany(PrimaryKeyInfo.Map)
+                .Select(pk => pk.Name)
+                .ToArray();
         }
 
-        private string[] GetKeyPropertyNames(Type type, MetadataWorkspace workspace)
+        private static Type FindContextTypeForEntity(Type entityType)
         {
-            EdmType edmType;
+            var dbContextType = typeof(DbContext);
+            var setType = typeof(IDbSet<>);
 
-            if (workspace.TryGetType(type.Name, type.Namespace, DataSpace.OSpace, out edmType))
-            {
-                return edmType.MetadataProperties
-                    .Where(mp => mp.Name == "KeyMembers")
-                    .SelectMany(mp => mp.Value as ReadOnlyMetadataCollection<EdmMember>)
-                    .OfType<EdmProperty>()
-                    .Select(edmProperty => edmProperty.Name)
-                    .ToArray();
-            }
+            Func<Type, bool> isEntityType          = t => entityType.Equals(t);
+            Func<PropertyInfo, bool> isDbSet       = p => setType.IsAssignableFrom(p.PropertyType.GetGenericTypeDefinition());
+            Func<PropertyInfo, bool> isEntityDbSet = p => isDbSet(p) && isEntityType(p.PropertyType.GenericTypeArguments[0]);
+            Func<Type, bool> isHostContext         = t => t.GetProperties().Any(isEntityDbSet);
 
-            // Test for an Id property
-            if (type.GetProperty(_entityIdProperty) != null)
-                return new[] {_entityIdProperty};
-            // Failed, so let's try a sane default
-            if (type.GetProperty("Id") != null)
-                return new[] {"Id"};
-            // That failed, so try {TEntity}Id
-            var idProperty = string.Format("{0}ID", type.Name);
-            if (type.GetProperty(idProperty) != null)
-                return new[] {idProperty};
-            // Still nothing? Well, nothing to do but return an empty list
-            return new string[0];
-        }
-
-        private dynamic GetNextId<TKey>()
-        {
-            var keyType = typeof (TKey);
-            if (keyType.Equals(typeof (int)) || keyType.Equals(typeof(long)))
-            {
-                if (_data.Any())
-                    return _data.Select(GetItemId).Max() + 1;
-                else return 1;
-            }
-            else if (keyType.Equals(typeof(Guid)))
-            {
-                return Guid.NewGuid();
-            }
-            else if (keyType.Equals(typeof (string)))
-            {
-                return Guid.NewGuid().ToString();
-            }
-            else return null;
-        }
-
-        private dynamic GetItemId(TEntity item)
-        {
-            var keyType = typeof (TKey);
-            var primaryKey = _primaryKeys
-                .Where(p =>
-                    p.Name == _entityIdProperty ||
-                    p.Name == "Id" ||
-                    p.Name == string.Format("{0}Id", typeof (TEntity).Name)
-                )
-                .FirstOrDefault(p => p.PropertyType.Equals(keyType));
-
-            // If the type of the primary key is a number type
-            // Return a positive number, since the only value that matters is 0 (uncreated record)
-            if (keyType.Equals(typeof(int)) || keyType.Equals(typeof(long)))
-            {
-                if (primaryKey == null)
-                    return 1;
-            }
-            // Likewise, ensure guid/string types return an id of some kind
-            else if (keyType.Equals(typeof(Guid)))
-            {
-                if (primaryKey == null)
-                    return Guid.NewGuid();
-            }
-            else if (keyType.Equals(typeof(string)))
-            {
-                if (primaryKey == null)
-                    return Guid.NewGuid().ToString();
-            }
-
-            return (TKey) primaryKey.GetValue(item);
-        }
-
-        private TEntity SetItemId(TEntity item, TKey id)
-        {
-            var primaryKey = _primaryKeys.First(p =>
-                p.Name == _entityIdProperty ||
-                p.Name == "Id" ||
-                p.Name == string.Format("{0}Id", typeof(TEntity).Name)
-            );
-            primaryKey.SetValue(item, id);
-            return item;
+            // Assumption: Models and context are defined in same assembly
+            return entityType.Assembly
+                .GetTypes()
+                .Where(dbContextType.IsAssignableFrom)
+                .Single(isHostContext);
         }
     }
 }

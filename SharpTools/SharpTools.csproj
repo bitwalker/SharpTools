@@ -66,6 +66,7 @@
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncEnumerator.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncQueryProvider.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbSet.cs" />
+    <Compile Include="Testing\EntityFramework\PrimaryKeyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
