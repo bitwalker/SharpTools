@@ -59,6 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\RingBuffer.cs" />
+    <Compile Include="Diagnostics\Logging\ILogger.cs" />
+    <Compile Include="Diagnostics\Logging\InMemoryLogger.cs" />
+    <Compile Include="Diagnostics\Logging\LogLevel.cs" />
     <Compile Include="Extend\Time\TimeSpanConversions.cs" />
     <Compile Include="IO\Utility\FileWatcher\FileWatcher.cs" />
     <Compile Include="IO\Utility\FileWatcher\IFileWatcher.cs" />
