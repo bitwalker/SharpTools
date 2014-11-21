@@ -66,6 +66,9 @@
     <Compile Include="IO\Utility\FileWatcher\FileWatcher.cs" />
     <Compile Include="IO\Utility\FileWatcher\IFileWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reflection\CallerInfo.cs" />
+    <Compile Include="Reflection\GenericTypeInfo.cs" />
+    <Compile Include="Reflection\Reflector.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncEnumerable.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncEnumerator.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncQueryProvider.cs" />
