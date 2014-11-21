@@ -5,19 +5,20 @@ using System.Linq;
 
 namespace SharpTools.Testing.EntityFramework
 {
-    internal class PrimaryKeyInfo
+    internal sealed class PrimaryKeyInfo
     {
-        public string Name { get; set; }
-        public bool IsComputed { get; set; }
-        public bool IsIdentity { get; set; }
-        public Type KeyType { get; set; }
+        public string Name { get; private set; }
+        public Type KeyType { get; private set; }
+        public StoreGeneratedPattern StoreGeneratedPattern { get; private set; }
+        public bool IsStoreGenerated { get { return StoreGeneratedPattern != StoreGeneratedPattern.None; }}
+        public bool IsComputed { get { return StoreGeneratedPattern == StoreGeneratedPattern.Computed; }}
+        public bool IsIdentity { get { return StoreGeneratedPattern == StoreGeneratedPattern.Identity; }}
         
         public PrimaryKeyInfo(EntityType entityType, EdmProperty keyProperty)
         {
             Name = keyProperty.Name;
-            IsComputed = keyProperty.IsStoreGeneratedComputed;
-            IsIdentity = keyProperty.IsStoreGeneratedIdentity;
             KeyType = keyProperty.PrimitiveType.ClrEquivalentType;
+            StoreGeneratedPattern = keyProperty.StoreGeneratedPattern;
         }
         
         public static IEnumerable<PrimaryKeyInfo> Map(EntityType entityType)

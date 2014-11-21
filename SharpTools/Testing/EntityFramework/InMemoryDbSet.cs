@@ -85,12 +85,15 @@ namespace SharpTools.Testing.EntityFramework
         TEntity IDbSet<TEntity>.Add(TEntity item)
         {
             // Generate and set all of the primary key values for this item
-            foreach (var primaryKey in _primaryKeys)
+            foreach (var primaryKey in _primaryKeys.Where(pk => pk.IsStoreGenerated && !pk.IsComputed))
             {
-                var keyGenerator = IdentifierGeneratorFactory.Create(primaryKey);
                 var keyProperty  = _primaryKeyProps.First(p => p.Name == primaryKey.Name);
-                var key          = keyGenerator.Generate();
-                keyProperty.SetValue(item, key);
+                if (keyProperty.CanWrite)
+                {
+                    var keyGenerator = IdentifierGeneratorFactory.Create(primaryKey);
+                    var key          = keyGenerator.Generate();
+                    keyProperty.SetValue(item, key);
+                }
             }
 
             _data.Add(item);
