@@ -89,7 +89,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Reflection\README.md" />
     <None Include="Scripting\Powershell\Networking\send_socket_command.ps1" />
+    <None Include="Testing\README.md" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
