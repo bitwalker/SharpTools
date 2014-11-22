@@ -6,7 +6,7 @@ using System.Data.Entity.Validation;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SharpTools.Testing.EntityFramework
+namespace SharpTools.Database.EntityFramework
 {
     public interface IDbContext
     {
@@ -16,7 +16,7 @@ namespace SharpTools.Testing.EntityFramework
         Task<int> SaveChangesAsync();
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         IEnumerable<DbEntityValidationResult> GetValidationErrors();
-        DbEntityEntry Entry<TEntity>(TEntity entity) where TEntity : class;
+        DbEntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         DbEntityEntry Entry(object entity);
         int ExecuteSqlCommand(string sql, params object[] parameters);
         int ExecuteSqlCommand(TransactionalBehavior behavior, string sql, params object[] parameters);

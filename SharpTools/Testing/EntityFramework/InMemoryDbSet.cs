@@ -11,6 +11,7 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Threading;
 using System.Threading.Tasks;
 
+using SharpTools.Database.EntityFramework;
 using SharpTools.Testing.EntityFramework.Internal;
 
 namespace SharpTools.Testing.EntityFramework

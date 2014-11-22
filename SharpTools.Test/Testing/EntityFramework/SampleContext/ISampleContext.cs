@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.Entity;
 
-using SharpTools.Testing.EntityFramework;
+using SharpTools.Database.EntityFramework;
 
 namespace SharpTools.Test.Testing.EntityFramework.SampleContext
 {

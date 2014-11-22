@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\RingBuffer.cs" />
+    <Compile Include="Database\EntityFramework\BaseDbContext.cs" />
     <Compile Include="Diagnostics\Logging\ILogger.cs" />
     <Compile Include="Diagnostics\Logging\InMemoryLogger.cs" />
     <Compile Include="Diagnostics\Logging\LogLevel.cs" />
@@ -69,7 +70,7 @@
     <Compile Include="Reflection\CallerInfo.cs" />
     <Compile Include="Reflection\GenericTypeInfo.cs" />
     <Compile Include="Reflection\Reflector.cs" />
-    <Compile Include="Testing\EntityFramework\IDbContext.cs" />
+    <Compile Include="Database\EntityFramework\IDbContext.cs" />
     <Compile Include="Testing\EntityFramework\Internal\ForeignKeyException.cs" />
     <Compile Include="Testing\EntityFramework\Internal\ForeignKeyInfo.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncEnumerable.cs" />
