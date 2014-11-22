@@ -61,6 +61,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Extend\Collections\ArrayExtensionsTest.cs" />
     <Compile Include="Extend\Collections\ComparerTests.cs" />
     <Compile Include="IO\Utility\FileWatcher\FileWatcherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
