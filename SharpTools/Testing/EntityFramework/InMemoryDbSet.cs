@@ -63,7 +63,7 @@ namespace SharpTools.Testing.EntityFramework
                 .ToArray();
         }
 
-        public InMemoryDbSet(IDbContext context) : base()
+        public InMemoryDbSet(IDbContext context)
         {
             _parentContext = context;
             _data  = new ObservableCollection<TEntity>();
