@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Linq;
 
-namespace SharpTools.Testing.EntityFramework
+namespace SharpTools.Testing.EntityFramework.Internal
 {
     internal sealed class PrimaryKeyInfo
     {
@@ -13,12 +13,14 @@ namespace SharpTools.Testing.EntityFramework
         public bool IsStoreGenerated { get { return StoreGeneratedPattern != StoreGeneratedPattern.None; }}
         public bool IsComputed { get { return StoreGeneratedPattern == StoreGeneratedPattern.Computed; }}
         public bool IsIdentity { get { return StoreGeneratedPattern == StoreGeneratedPattern.Identity; }}
+        public StructuralType StructuralType { get; private set; }
         
         public PrimaryKeyInfo(EntityType entityType, EdmProperty keyProperty)
         {
             Name = keyProperty.Name;
             KeyType = keyProperty.PrimitiveType.ClrEquivalentType;
             StoreGeneratedPattern = keyProperty.StoreGeneratedPattern;
+            StructuralType = keyProperty.DeclaringType;
         }
         
         public static IEnumerable<PrimaryKeyInfo> Map(EntityType entityType)

@@ -69,6 +69,9 @@
     <Compile Include="Reflection\CallerInfo.cs" />
     <Compile Include="Reflection\GenericTypeInfo.cs" />
     <Compile Include="Reflection\Reflector.cs" />
+    <Compile Include="Testing\EntityFramework\IDbContext.cs" />
+    <Compile Include="Testing\EntityFramework\Internal\ForeignKeyException.cs" />
+    <Compile Include="Testing\EntityFramework\Internal\ForeignKeyInfo.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncEnumerable.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncEnumerator.cs" />
     <Compile Include="Testing\EntityFramework\InMemoryDbAsyncQueryProvider.cs" />
@@ -80,7 +83,7 @@
     <Compile Include="Testing\EntityFramework\Internal\Id\IdentityType.cs" />
     <Compile Include="Testing\EntityFramework\Internal\IIdentifierGenerator.cs" />
     <Compile Include="Testing\EntityFramework\Internal\IIdentityType.cs" />
-    <Compile Include="Testing\EntityFramework\PrimaryKeyInfo.cs" />
+    <Compile Include="Testing\EntityFramework\Internal\PrimaryKeyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

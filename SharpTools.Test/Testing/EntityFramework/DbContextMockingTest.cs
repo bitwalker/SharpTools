@@ -51,6 +51,12 @@ namespace SharpTools.Test.Testing.EntityFramework
             var admins = _context.Roles.FirstOrDefault(r => r.Name == "Admins");
             Assert.IsNotNull(admins);
             Assert.AreEqual("Admins", admins.Name);
+
+            var byId = _context.Users.Where(u => u.UserRole.Id == admins.Id).ToArray();
+            Assert.IsNotNull(byId);
+            Assert.IsTrue(byId.Any());
+            Assert.AreEqual(byId.Count(), 1);
+            Assert.AreEqual("Paul", byId.First().FirstName);
         }
 
         [TestMethod]
@@ -97,32 +103,12 @@ namespace SharpTools.Test.Testing.EntityFramework
             Assert.IsTrue(adminUsers.ToArray().Contains(bill.Id));
 
             // TODO: Make sure relations are linked on Add
-            var usingLinq = _context.Roles.Where(r => r.Name == "Admin")
+            var usingLinq = _context.Roles.Where(r => r.Name == "Admins")
                     .SelectMany(r => r.Users)
                     .Select(u => u.Id)
                     .ToArray();
 
             Assert.IsTrue(usingLinq.Contains(bill.Id));
-        }
-
-        [TestMethod]
-        public void CanMockDbContextEffectively()
-        {
-            var admins = _context.Roles.First(r => r.Name == "Admins");
-
-            // Simple linq-to-objects query
-            var byName = _context.Users.Where(u => u.UserRole.Name == admins.Name).ToArray();
-            Assert.IsNotNull(byName);
-            Assert.IsTrue(byName.Any());
-            Assert.AreEqual(byName.Count(), 1);
-            Assert.AreEqual("Paul", byName.First().FirstName);
-
-            // Id generation, and querying by id
-            var byId = _context.Users.Where(u => u.UserRole.Id == admins.Id).ToArray();
-            Assert.IsNotNull(byId);
-            Assert.IsTrue(byId.Any());
-            Assert.AreEqual(byId.Count(), 1);
-            Assert.AreEqual("Paul", byId.First().FirstName);
         }
     }
 }

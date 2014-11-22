@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using System;
+using Moq;
 
 using SharpTools.Testing.EntityFramework;
 using SharpTools.Test.Testing.EntityFramework.SampleContext;
@@ -11,10 +12,14 @@ namespace SharpTools.Test.Testing.EntityFramework
         {
             var contextMock = new Mock<ISampleContext>();
             contextMock.SetupAllProperties();
-            contextMock.DefaultValue = DefaultValue.Empty;
+            contextMock.DefaultValue = DefaultValue.Mock;
 
-            contextMock.Setup(ctx => ctx.Users).Returns(new InMemoryDbSet<User>());
-            contextMock.Setup(ctx => ctx.Roles).Returns(new InMemoryDbSet<Role>());
+            var userSet = new InMemoryDbSet<User>(contextMock.Object);
+            var roleSet = new InMemoryDbSet<Role>(contextMock.Object);
+            contextMock.Setup(ctx => ctx.Users).Returns(userSet);
+            contextMock.Setup(ctx => ctx.Roles).Returns(roleSet);
+            contextMock.Setup(ctx => ctx.Set(It.Is<Type>(t => typeof (User).Equals(t)))).Returns(userSet);
+            contextMock.Setup(ctx => ctx.Set(It.Is<Type>(t => typeof (Role).Equals(t)))).Returns(roleSet);
 
             return contextMock.Object;
         }
