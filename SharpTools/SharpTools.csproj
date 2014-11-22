@@ -81,9 +81,7 @@
     <Compile Include="Testing\EntityFramework\Internal\Id\AutoIncrementingIdentifierGenerators.cs" />
     <Compile Include="Testing\EntityFramework\Internal\Id\DefaultIdentifierGenerator.cs" />
     <Compile Include="Testing\EntityFramework\Internal\Id\GuidIdentifierGenerator.cs" />
-    <Compile Include="Testing\EntityFramework\Internal\Id\IdentityType.cs" />
     <Compile Include="Testing\EntityFramework\Internal\IIdentifierGenerator.cs" />
-    <Compile Include="Testing\EntityFramework\Internal\IIdentityType.cs" />
     <Compile Include="Testing\EntityFramework\Internal\PrimaryKeyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
