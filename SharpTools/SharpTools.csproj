@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\RingBuffer.cs" />
+    <Compile Include="Concurrency\WriteLockException.cs" />
     <Compile Include="Database\EntityFramework\BaseDbContext.cs" />
     <Compile Include="Diagnostics\Logging\ILogger.cs" />
     <Compile Include="Diagnostics\Logging\InMemoryLogger.cs" />
