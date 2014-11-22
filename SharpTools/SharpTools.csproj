@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Extend\README.md" />
     <None Include="packages.config" />
     <None Include="Reflection\README.md" />
     <None Include="Scripting\Powershell\Networking\send_socket_command.ps1" />
