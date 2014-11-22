@@ -102,7 +102,6 @@ namespace SharpTools.Test.Testing.EntityFramework
 
             Assert.IsTrue(adminUsers.ToArray().Contains(bill.Id));
 
-            // TODO: Make sure relations are linked on Add
             var usingLinq = _context.Roles.Where(r => r.Name == "Admins")
                     .SelectMany(r => r.Users)
                     .Select(u => u.Id)
