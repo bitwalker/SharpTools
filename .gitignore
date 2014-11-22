@@ -12,11 +12,9 @@
 [Rr]elease/
 [Rr]eleases/
 x64/
-build/
 bld/
 [Bb]in/
 [Oo]bj/
-Springs.Web/images/
 
 # Roslyn cache directories
 *.ide/
@@ -184,3 +182,7 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# NuGet Packaging
+build/NuGet.exe
+build/*.nupkg
