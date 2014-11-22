@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpTools.IO.Utility;
 using SharpTools.Extend.Time;
 
-namespace Springs.Tests
+namespace SharpTools.Test.IO.Utility
 {
     [TestClass]
     public class FileWatcherTests
@@ -21,12 +21,6 @@ namespace Springs.Tests
         public FileWatcherTests()
         {
             _watcher = new FileWatcher();
-        }
-
-        [ClassCleanup]
-        public static void Cleanup()
-        {
-            Directory.Delete(Path.Combine(_baseDirectory, ASSETS_DIR), recursive: true);
         }
 
         [TestMethod]
