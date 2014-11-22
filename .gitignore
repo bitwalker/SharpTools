@@ -15,6 +15,7 @@ x64/
 bld/
 [Bb]in/
 [Oo]bj/
+build/net45
 
 # Roslyn cache directories
 *.ide/
