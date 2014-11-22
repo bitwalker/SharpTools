@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SharpTools</id>
+    <version>$version$</version>
+    <authors>Paul Schoenfelder</authors>
+    <owners>Paul Schoenfelder</owners>
+    <licenseUrl>https://raw.githubusercontent.com/bitwalker/SharpTools/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bitwalker/SharpTools</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A collection of practical C# tools to build upon.</description>
+    <tags>utility helper extension testing reflection filewatcher</tags>
+    <dependencies>
+      <dependency id="EntityFramework" version="6.1.1" />
+      <dependency id="Rx-Core" version="2.2.5" />
+      <dependency id="Rx-Interfaces" version="2.2.5" />
+      <dependency id="Rx-Linq" version="2.2.5" />
+      <dependency id="Rx-Main" version="2.2.5" />
+      <dependency id="Rx-PlatformServices" version="2.2.5" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="build\net45\SharpTools.dll" target="lib\net45" />
+    <file src="build\net45\SharpTools.pdb" target="lib\net45" />
+    <file src="build\net45\SharpTools.xml" target="lib\net45" />
+    <file src="SharpTools\**\*.cs" target="src\SharpTools" />
+  </files>
+</package>
