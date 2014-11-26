@@ -1,57 +1,89 @@
-Properties {
-  # Project Info
-  $solutionName   = "SharpTools"
-  $nugetProject   = "SharpTools"
-  $configuration  = "Release"
+# Powershell preferences
+$VerobsePreference     = 'SilentlyContinue'
+$WarningPreference     = 'Continue'
+$ErrorActionPreference = 'Stop'
+
+# Load core functions
+. ".\core.ps1"
+
+trap {
+  $location      = $error[0].InvocationInfo.PositionMessage
+  $exception     = $error[0].Exception
+  $exceptionType = $exception.GetType().Name
+  $message       = $exception.Message
+
+  error "$exceptionType: $message"
+  error $location
+}
+
+# Load submodules
+$submodules = ls .\include\*.ps1 -exclude @("core.ps1")
+foreach ($mod in $submodules) {
+  info "Loading extensions from $mod..."
+  . $mod
+}
+
+properties { # Solution Info
+  $scripts_dir   = resolve-path $PSScriptRoot
+  $root_dir      = split-path $scripts_dir
+  $solution_name = "SharpTools"
+  $solution_file = join-path $root_dir "$solution_name.sln"
+}
+
+properties { # Nuget Packaging
+  $nuget        = join-path $scripts_dir "nuget.exe"
+  $package_name = $solution_name
+  $package_spec = join-path $scripts_dir "$package_name.nuspec"
+  $package_dir  = join-path $scripts_dir "package"
+  $net45_dir    = join-path $package_dir "net45"
+}
+
+properties { # Project Info
+  $projects      = get-projects $root_dir
+  $configuration = "Release"  # The build configuration to use
+  $platform      = "x64"      # The platform to build for
+  $verbosity     = "minimal"  # quiet, minimal, normal, detailed
+  $clsCompliant  = "true"     # produce more stringent build warnings
+  $runTests      = $true      # If true, will run tests prior to release
+}
+
+properties { # Environment Configuration
+  $environment = "dev"
+}
+
+properties { # Versioning
   $currentGitTag  = get-git-tag
   $revisionNumber = get-commits-since-tag $currentGitTag
   $version        = "${currentGitTag}.${revisionNumber}"
-  # Project Paths
-  $scriptPath     = split-path -parent $PSCommandPath
-  $buildDir       = $scriptPath
-  $net45Dir       = join-path $buildDir "net45"
-  $sln            = join-path $scriptPath "..\$solutionName.sln"
-  $nuget          = join-path $scriptPath "nuget.exe"
-  $packageSpec    = join-path $scriptPath "$nugetProject.nuspec"
-  $projectPath    = join-path $scriptPath "..\$nugetProject"
-  $releaseDir     = join-path $projectPath "bin\$configuration"
-  # Build Configuration
-  $verbosityLevel = "normal"
-  $runTests       = $true
 }
 
-# Ensure .NET 4+ is used
-Framework "4.0"
-# Customize task name output
-FormatTaskName (("-"*25) + "[{0}]" + ("-"*25))
-# Include helper functions
-(ls "$scriptPath\*.ps1" -exclude "default.ps1") | foreach {
-  include (join-path $scriptPath $_)
+task default -depends rebuild
+task rebuild -depends build
+
+task clean {
+  info "Cleaning solution..."
+  exec { msbuild "$solution_file" /t:Clean /p:Configuration=$configuration /v:$verbosity }
 }
 
-task Default -depends Rebuild
-task Rebuild -depends Build
+task precompile {
+  # Generate AssemblyInfo.cs for all projects
+  foreach ($project in $projects.GetEnumerator()) {
+    $projectName  = $project.Name
+    $projectInfo  = $project.Value
+    $assemblyInfo = join-path $projectInfo.ProjectPath "Properties\AssemblyInfo.cs"
 
-task Clean {
-  write-host "Cleaning package artifacts..." -ForegroundColor Green
-  remove-item -force -recurse $net45Dir -ErrorAction SilentlyContinue
+    generate-assembly-info `
+      -file $assemblyInfo `
+      -clsCompliant $clsCompliant `
+      -title "$projectName $version" `
+      -description "A collection of practical C# code to build upon" `
+      -company "Paul Schoenfelder" `
+      -product "$projectName $version" `
+      -version $version `
+      -copyright "Paul Schoenfelder 2014"
+  }
 
-  write-host "Cleaning SharpTools solution..." -ForegroundColor Green
-  exec { msbuild "$sln" /t:Clean /p:Configuration=$configuration /v:quiet }
-}
-
-task Prepare -depends Clean {
-  $assemblyInfo = join-path $projectPath "Properties\AssemblyInfo.cs"
-  generate-assembly-info `
-    -file $assemblyInfo `
-    -title "SharpTools $version" `
-    -description "A collection of practical C# code to build upon" `
-    -company "Paul Schoenfelder" `
-    -product "SharpTools $version" `
-    -version $version `
-    -copyright "Paul Schoenfelder 2014"
-
-  new-item $net45Dir -itemType directory
+  mkdirp $net45_dir
 }
 
 task Build -depends Prepare {
@@ -79,15 +111,14 @@ task TestBuild {
 }
 
 task Test -depends TestBuild -precondition { return $runTests } {
-  $testProj     = join-path $scriptPath "..\SharpTools.Test"
-  $testArtifact = join-path $testProj "bin\Debug\SharpTools.Test.dll"
-  $msTestDir    = join-path ($env:programfiles + " (x86)") "Microsoft Visual Studio 12.0\Common7\IDE"
-  $mstest       = join-path $msTestDir "mstest.exe"
-  # Run tests
-  & $runner /testcontainer:$testArtifact /noresults
+  mstest $testProject
 }
 
 task Package -depends Build, Test {
+  info "Cleaning package artifacts..."
+  remove -rf $net45Dir
+
+  rm -recurse
   write-host "Generating nuget package..." -ForegroundColor Green
   & $nuget pack $packageSpec `
     -o $buildDir `

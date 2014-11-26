@@ -1,4 +1,2 @@
 @echo off
-
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0\build.ps1' %*;"
-exit /B %errorlevel%
+powershell.exe -NoProfile -ExecutionPolicy unrestricted -Command "& {Import-Module '.\build\psake.psm1'; invoke-psake .\build\default.ps1 %1; if ($lastexitcode -ne 0) {write-host "ERROR: $lastexitcode" -fore RED; exit $lastexitcode} }"
