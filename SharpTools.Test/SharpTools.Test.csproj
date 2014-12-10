@@ -70,6 +70,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Crypto\CryptoProviderTest.cs" />
     <Compile Include="Extend\Collections\ArrayExtensionsTest.cs" />
     <Compile Include="Extend\Collections\ComparerTests.cs" />
     <Compile Include="IO\Utility\FileWatcher\FileWatcherTests.cs" />

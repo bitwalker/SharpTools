@@ -96,6 +96,10 @@
   <ItemGroup>
     <Compile Include="Collections\RingBuffer.cs" />
     <Compile Include="Concurrency\WriteLockException.cs" />
+    <Compile Include="Crypto\CryptoAlgorithmFactory.cs" />
+    <Compile Include="Crypto\CryptoProvider.cs" />
+    <Compile Include="Crypto\Engines\Salsa20\Salsa20CryptoServiceProvider.cs" />
+    <Compile Include="Crypto\Engines\Salsa20\Salsa20CryptoTransform.cs" />
     <Compile Include="Database\EntityFramework\BaseDbContext.cs" />
     <Compile Include="Diagnostics\Logging\ILogger.cs" />
     <Compile Include="Diagnostics\Logging\InMemoryLogger.cs" />
