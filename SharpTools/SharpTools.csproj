@@ -72,6 +72,9 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -96,6 +99,16 @@
   <ItemGroup>
     <Compile Include="Collections\RingBuffer.cs" />
     <Compile Include="Concurrency\WriteLockException.cs" />
+    <Compile Include="Configuration\Attributes\EncryptAttribute.cs" />
+    <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="Configuration\Conflict.cs" />
+    <Compile Include="Configuration\Exceptions\DecryptConfigException.cs" />
+    <Compile Include="Configuration\Exceptions\EncryptConfigException.cs" />
+    <Compile Include="Configuration\Exceptions\ReadConfigException.cs" />
+    <Compile Include="Configuration\Exceptions\WriteConfigException.cs" />
+    <Compile Include="Configuration\IConfig.cs" />
+    <Compile Include="Configuration\IProvider.cs" />
+    <Compile Include="Configuration\Providers\JsonConfigProvider.cs" />
     <Compile Include="Crypto\CryptoAlgorithmFactory.cs" />
     <Compile Include="Crypto\CryptoProvider.cs" />
     <Compile Include="Crypto\Engines\Salsa20\Salsa20CryptoServiceProvider.cs" />

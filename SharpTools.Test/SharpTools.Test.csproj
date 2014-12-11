@@ -70,6 +70,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\JsonConfigProviderTest.cs" />
     <Compile Include="Crypto\CryptoProviderTest.cs" />
     <Compile Include="Extend\Collections\ArrayExtensionsTest.cs" />
     <Compile Include="Extend\Collections\ComparerTests.cs" />
