@@ -79,7 +79,7 @@ namespace SharpTools.Configuration.Providers
             foreach (var prop in configProperties)
             {
                 if (!prop.PropertyType.Equals(typeof(string)))
-                    throw new InvalidOperationException("The Encrypt attribute cannot be applied to non-string properties.");
+                    throw new ReadConfigException("The Encrypt attribute cannot be applied to non-string properties.");
 
                 // Decrypt the value if this is an encrypted property
                 var value     = prop.GetValue(deserialized);
@@ -113,7 +113,7 @@ namespace SharpTools.Configuration.Providers
             foreach (var prop in encryptedProperties)
             {
                 if (!prop.PropertyType.Equals(typeof(string)))
-                    throw new InvalidOperationException("The Encrypt attribute cannot be applied to non-string properties.");
+                    throw new WriteConfigException("The Encrypt attribute cannot be applied to non-string properties.");
 
                 var jprop     = jobj.Property(prop.Name);
                 var val       = jprop.Value as JValue;
