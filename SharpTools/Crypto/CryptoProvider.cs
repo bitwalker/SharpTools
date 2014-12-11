@@ -18,7 +18,7 @@ namespace SharpTools.Crypto
     /// unsalted password by ensuring there is at least 128 bits available for deriving the key,
     /// and 512 if you use the defaults.
     /// </summary>
-    public sealed class CryptoProvider
+    public sealed class CryptoProvider : IDisposable
     {
         /// <summary>
         /// Recommended number of iterations to perform when hashing the provided password
@@ -115,6 +115,17 @@ namespace SharpTools.Crypto
             }
 
             return decrypted;
+        }
+
+        public void Dispose()
+        {
+            if (_algorithm != null)
+            {
+                _algorithm.Dispose();
+                _algorithm = null;
+            }
+            if (_algorithmsFactory != null)
+                _algorithmsFactory = null;
         }
 
         /// <summary>
