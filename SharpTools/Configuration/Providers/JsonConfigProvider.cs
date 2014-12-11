@@ -14,12 +14,11 @@ namespace SharpTools.Configuration.Providers
     using SharpTools.Crypto;
     using SharpTools.Configuration.Attributes;
 
-    public class JsonConfigProvider<T> : IProvider<T>
+    public class JsonConfigProvider<T> : BaseConfigProvider<T>
         where T : class, IConfig<T>, new()
     {
         private readonly Stream _output;
         private readonly JsonSerializerSettings _settings;
-        private CryptoProvider _crypto;
 
         public Stream Output { get { return _output; } }
 
@@ -28,6 +27,7 @@ namespace SharpTools.Configuration.Providers
         }
 
         public JsonConfigProvider(Stream output)
+            : base()
         {
             if (output == null)
                 throw new ArgumentNullException("output", "Output stream cannot be null!");
@@ -43,6 +43,7 @@ namespace SharpTools.Configuration.Providers
         }
 
         public JsonConfigProvider(Stream output, JsonSerializerSettings settings)
+            : base()
         {
             if (output == null)
                 throw new ArgumentNullException("output", "Output stream cannot be null!");
@@ -68,22 +69,15 @@ namespace SharpTools.Configuration.Providers
         {
             var deserialized = JsonConvert.DeserializeObject<T>(config, _settings);
 
-            var configProperties = typeof (T).GetProperties()
-                .Where(p => p.CanWrite)
-                .Where(p => !p.GetIndexParameters().Any())
-                .Where(p => Attribute.IsDefined(p, typeof(EncryptAttribute)));
-
-            var encryptionKey = new T().GetEncryptionKey();
-            InitializeCrypto(encryptionKey);
-
-            foreach (var prop in configProperties)
+            var encryptedProperties = GetPropertiesToEncrypt();
+            foreach (var prop in encryptedProperties)
             {
                 if (!prop.PropertyType.Equals(typeof(string)))
                     throw new ReadConfigException("The Encrypt attribute cannot be applied to non-string properties.");
 
-                // Decrypt the value if this is an encrypted property
+                // Decrypt the value
                 var value     = prop.GetValue(deserialized);
-                var decrypted = _crypto.Decrypt(value as string);
+                var decrypted = Crypto.Decrypt(value as string);
                 prop.SetValue(deserialized, decrypted);
             }
 
@@ -97,16 +91,9 @@ namespace SharpTools.Configuration.Providers
 
         public void Save(T config)
         {
-            InitializeCrypto(config.GetEncryptionKey());
-
             // Generate the tokenized json for the config
             var serializer = JsonSerializer.Create(_settings);
             var jobj       = JObject.FromObject(config, serializer);
-
-            // Load the encryption key
-            var encryptionKey = config.GetEncryptionKey();
-            if (string.IsNullOrWhiteSpace(encryptionKey))
-                throw new EncryptConfigException("Invalid encryption key! Must not be null or empty.");
 
             // Encrypt the values of all EncryptAttribute-decorated properties
             var encryptedProperties = GetPropertiesToEncrypt();
@@ -117,7 +104,7 @@ namespace SharpTools.Configuration.Providers
 
                 var jprop     = jobj.Property(prop.Name);
                 var val       = jprop.Value as JValue;
-                var encrypted = _crypto.Encrypt(val.Value as string);
+                var encrypted = Crypto.Encrypt(val.Value as string);
                 val.Value     = encrypted;
                 jprop.Value   = val;
             }
@@ -139,25 +126,7 @@ namespace SharpTools.Configuration.Providers
             return Task.Run(() => Save(config));
         }
 
-        private PropertyInfo[] GetPropertiesToEncrypt()
-        {
-            return typeof (T).GetProperties()
-                .Where(p => Attribute.IsDefined(p, typeof (EncryptAttribute)))
-                .ToArray();
-        }
-
-        private void InitializeCrypto(string password)
-        {
-            // Make sure the crypto provider is reset for this configuration
-            if (_crypto != null)
-            {
-                _crypto.Dispose();
-                _crypto = null;
-            }
-            _crypto = new CryptoProvider(password);
-        }
-
-        private JsonSerializerSettings GetDefaultSettings()
+        internal static JsonSerializerSettings GetDefaultSettings()
         {
             var settings = new JsonSerializerSettings();
             settings.Formatting = Formatting.Indented;
@@ -174,7 +143,7 @@ namespace SharpTools.Configuration.Providers
             return settings;
         }
 
-        private JsonConverter[] GetDefaultConverters()
+        internal static JsonConverter[] GetDefaultConverters()
         {
             return new JsonConverter[]
             {
