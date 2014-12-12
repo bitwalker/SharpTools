@@ -124,6 +124,9 @@
     <Compile Include="Extend\Collections\GenericComparer.cs" />
     <Compile Include="Extend\Collections\MultiComparer.cs" />
     <Compile Include="Extend\Time\TimeSpanConversions.cs" />
+    <Compile Include="Functional\Either.cs" />
+    <Compile Include="Functional\Option.cs" />
+    <Compile Include="Functional\Function.cs" />
     <Compile Include="IO\Utility\FileWatcher\FileWatcher.cs" />
     <Compile Include="IO\Utility\FileWatcher\IFileWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
