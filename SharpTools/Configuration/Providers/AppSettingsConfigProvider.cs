@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Configuration;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using SharpTools.Configuration.Attributes;
 
 namespace SharpTools.Configuration.Providers
 {
-    using SharpTools.Crypto;
+    using SharpTools.Functional;
+    using SharpTools.Configuration.Errors;
+    using SharpTools.Configuration.Attributes;
 
     public class AppSettingsConfigProvider<T> : BaseConfigProvider<T>
         where T : class, IConfig<T>, new()
@@ -28,7 +26,17 @@ namespace SharpTools.Configuration.Providers
             _settings = settings;
         }
 
-        public T Read()
+        public override bool IsInitialized()
+        {
+            return true;
+        }
+
+        public override void Initialize()
+        {
+            return;
+        }
+
+        public override T Read()
         {
             var appSettings = GetAppSettings();
             var properties  = GetConfigProperties();
@@ -66,29 +74,29 @@ namespace SharpTools.Configuration.Providers
             return result;
         }
 
-        public Task<T> ReadAsync()
-        {
-            return Task.FromResult(Read());
-        }
-
-        public T Read(string config)
+        public override T Read(string source)
         {
             throw new NotImplementedException();
         }
 
-        public Task<T> ReadAsync(string config)
-        {
-            return Task.FromResult(Read(config));
-        }
-
-        public void Save(T config)
+        public override Either<ParseConfigError<T>, T> Parse(string config)
         {
             throw new NotImplementedException();
         }
 
-        public Task SaveAsync(T config)
+        public override void Save(T config)
         {
-            return Task.Run(() => Save(config));
+            throw new NotImplementedException();
+        }
+
+        public override void Save(T config, string source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string Serialize(T config)
+        {
+            throw new NotImplementedException();
         }
 
         private Dictionary<string, string> GetAppSettings()

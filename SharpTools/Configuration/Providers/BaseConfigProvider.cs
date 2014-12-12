@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
+
 using Newtonsoft.Json;
 
 namespace SharpTools.Configuration.Providers
 {
     using SharpTools.Crypto;
+    using SharpTools.Functional;
+    using SharpTools.Configuration.Errors;
     using SharpTools.Configuration.Attributes;
 
     public abstract class BaseConfigProvider<T> : IProvider<T>, IDisposable
@@ -28,14 +30,16 @@ namespace SharpTools.Configuration.Providers
             }
         }
 
+        public abstract bool IsInitialized();
+        public abstract void Initialize();
         public abstract T Read();
-        public abstract Task<T> ReadAsync();
-        public abstract T Read(string config);
-        public abstract Task<T> ReadAsync(string config);
+        public abstract T Read(string source);
+        public abstract Either<ParseConfigError<T>, T> Parse(string config);
         public abstract void Save(T config);
-        public abstract Task SaveAsync(T config);
+        public abstract void Save(T config, string source);
+        public abstract string Serialize(T config);
 
-        protected PropertyInfo[] GetConfigProperties()
+        protected static PropertyInfo[] GetConfigProperties()
         {
             return typeof (T).GetProperties()
                 .Where(p => p.CanWrite)
@@ -44,7 +48,7 @@ namespace SharpTools.Configuration.Providers
                 .ToArray();
         }
 
-        protected PropertyInfo[] GetPropertiesToEncrypt()
+        protected static PropertyInfo[] GetPropertiesToEncrypt()
         {
             return GetConfigProperties()
                 .Where(p => Attribute.IsDefined(p, typeof (EncryptAttribute)))

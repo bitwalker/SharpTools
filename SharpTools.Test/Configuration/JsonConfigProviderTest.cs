@@ -23,13 +23,7 @@ namespace SharpTools.Test.Configuration
             config.ConnectionString   = "Server=somehost;Database=goldmine;User Id=sa;Password=supersecret";
 
             var provider = new JsonConfigProvider<MyTestConfig>();
-            provider.Save(config);
-            string json;
-            using (var serialized = provider.Output)
-            using (var reader = new StreamReader(serialized))
-            {
-                json = reader.ReadToEnd();
-            }
+            var json = provider.Serialize(config);
 
             Assert.IsFalse(string.IsNullOrWhiteSpace(json));
 
