@@ -13,52 +13,34 @@ namespace SharpTools.Test.Configuration
     public class JsonConfigProviderTest
     {
         [TestMethod]
-        public void CanSerializeWithEncryption()
+        public void CanSerializeAndDeserializeConfig()
         {
-            var config = new MyTestConfig();
-            config.LogLevel           = MyTestConfig.LogLevels.Warn;
-            config.MaxLogFileSizeMb   = 42;
-            config.EndOfYear          = new DateTime(2014, 12, 31);
-            config.ValidUsernameRegex = new Regex(@"^[A-Za-z]{1}[A-Za-z-_0-9]{7,}$");
-            config.ConnectionString   = "Server=somehost;Database=goldmine;User Id=sa;Password=supersecret";
+            var expected = new MyTestConfig();
+            expected.LogLevel           = MyTestConfig.LogLevels.Warn;
+            expected.MaxLogFileSizeMb   = 42;
+            expected.EndOfYear          = new DateTime(2014, 12, 31);
+            expected.ValidUsernameRegex = new Regex(@"^[A-Za-z]{1}[A-Za-z-_0-9]{7,}$");
+            expected.ConnectionString   = "Server=somehost;Database=goldmine;User Id=sa;Password=supersecret";
 
             var provider = new JsonConfigProvider<MyTestConfig>();
-            var json = provider.Serialize(config);
+            var json = provider.Serialize(expected);
 
             Assert.IsFalse(string.IsNullOrWhiteSpace(json));
 
-            var deserialized = provider.Read(json);
+            var deserialized = provider.Parse(json);
 
             Assert.IsNotNull(deserialized);
 
-            Assert.AreEqual(config.LogLevel, deserialized.LogLevel);
-            Assert.AreEqual(config.MaxLogFileSizeMb, deserialized.MaxLogFileSizeMb);
-            Assert.AreEqual(config.EndOfYear, deserialized.EndOfYear);
-            Assert.AreEqual(config.ValidUsernameRegex.ToString(), deserialized.ValidUsernameRegex.ToString());
-            Assert.AreEqual(config.ConnectionString, deserialized.ConnectionString);
-        }
-
-        public class MyTestConfig : IConfig<MyTestConfig>
-        {
-            public enum LogLevels
-            {
-                Debug = 0,
-                Info,
-                Warn,
-                Error
-            }
-
-            public LogLevels LogLevel { get; set; }
-            public int MaxLogFileSizeMb { get; set; }
-            public DateTime EndOfYear { get; set; }
-            public Regex ValidUsernameRegex { get; set; }
-            [Encrypt]
-            public string ConnectionString { get; set; }
-
-            public string GetEncryptionKey()
-            {
-                return "w^&919dab";
-            }
+            deserialized.Case(
+                error => Assert.Fail(error.Message),
+                config =>
+                {
+                    Assert.AreEqual(config.LogLevel, config.LogLevel);
+                    Assert.AreEqual(config.MaxLogFileSizeMb, config.MaxLogFileSizeMb);
+                    Assert.AreEqual(config.EndOfYear, config.EndOfYear);
+                    Assert.AreEqual(config.ValidUsernameRegex.ToString(), config.ValidUsernameRegex.ToString());
+                    Assert.AreEqual(config.ConnectionString, config.ConnectionString);
+                });
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using Newtonsoft.Json;
@@ -57,7 +58,7 @@ namespace SharpTools.Configuration.Providers
         public override T Read(string source)
         {
             if (!File.Exists(source))
-                return new T();
+                throw new FileNotFoundException("The configuration file path provided does not exist.", source);
 
             return _configReader(source).Case(
                 error  => { throw new ConfigException(error.Message); },
@@ -109,18 +110,8 @@ namespace SharpTools.Configuration.Providers
 
         public override string Serialize(T config)
         {
-            string json;
             var jobj = TokenizeAndEncrypt(config, _settings, Crypto);
-
-            using (var ms         = new MemoryStream())
-            using (var writer     = new StreamWriter(ms, Encoding.UTF8, 4096, leaveOpen: true))
-            using (var jsonWriter = new JsonTextWriter(writer))
-            {
-                jsonWriter.Formatting = _settings.Formatting;
-                jobj.WriteTo(jsonWriter);
-                json = Encoding.UTF8.GetString(ms.ToArray());
-            }
-            return json;
+            return jobj.ToString(_settings.Formatting, _settings.Converters.ToArray());
         }
 
         internal static JObject TokenizeAndEncrypt(T config, JsonSerializerSettings settings, CryptoProvider crypto)

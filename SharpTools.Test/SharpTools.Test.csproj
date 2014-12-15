@@ -70,7 +70,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\AppSettingsConfigProviderTest.cs" />
     <Compile Include="Configuration\JsonConfigProviderTest.cs" />
+    <Compile Include="Configuration\MyTestConfig.cs" />
     <Compile Include="Crypto\CryptoProviderTest.cs" />
     <Compile Include="Extend\Collections\ArrayExtensionsTest.cs" />
     <Compile Include="Extend\Collections\ComparerTests.cs" />
@@ -86,6 +88,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Assets\Configuration\SampleApp.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Assets\FileWatcher\ImageA.tga">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

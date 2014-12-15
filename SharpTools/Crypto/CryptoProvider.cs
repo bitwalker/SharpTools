@@ -77,6 +77,9 @@ namespace SharpTools.Crypto
         /// <returns>A base64-encoded string</returns>
         public string Encrypt(string value)
         {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
             using (var encryptor    = _algorithm.CreateEncryptor())
             using (var result       = new MemoryStream())
             using (var cryptoStream = new CryptoStream(result, encryptor, CryptoStreamMode.Write))
@@ -87,7 +90,7 @@ namespace SharpTools.Crypto
                 }
 
                 var bytes = result.ToArray();
-                return Convert.ToBase64String(bytes, Base64FormattingOptions.InsertLineBreaks);
+                return Convert.ToBase64String(bytes, Base64FormattingOptions.None);
             }
         }
 
@@ -101,6 +104,9 @@ namespace SharpTools.Crypto
         /// </exception>
         public string Decrypt(string ciphertext)
         {
+            if (string.IsNullOrWhiteSpace(ciphertext))
+                return string.Empty;
+
             var bytes = Convert.FromBase64String(ciphertext);
 
             string decrypted;
